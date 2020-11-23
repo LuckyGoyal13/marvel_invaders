@@ -2,7 +2,6 @@ import pygame
 import math
 import random
 from pygame import mixer
-import time
 import csv
 import pyttsx3
 import os
@@ -52,6 +51,8 @@ def start():
                   if event.type == pygame.QUIT:
                      pygame.quit()
                      quit()
+                  elif event.type == pygame.MOUSEBUTTONUP:
+                       pos = pygame.mouse.get_pos() 
                   elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                          run = True
@@ -69,7 +70,7 @@ def start():
                game_text = font.render("Press A to Start the Game", True, (0,0,255))
           else:
                game_text = font.render("Press A to Start the Game", True, (255,0,0))
-          screen.blit(game_text, (203,552))
+          screen.blit(game_text, (205,550))
           pygame.display.update()
           count +=0.5
      
@@ -85,6 +86,7 @@ def pause():
                 quit()
              elif event.type == pygame.KEYDOWN:
                if event.key == pygame.K_c:
+                    mixer.music.unpause()
                     paused = False
                     run = True
                     #speaker("Continue")
@@ -121,8 +123,9 @@ def help_page():
      
 #Shop_Page
 def shop():
-     global select_status
+     global select_status,t
      buy = True
+     pressed="0"
      start = False
      select_status=False
      while buy:
@@ -149,50 +152,65 @@ def shop():
           num5_text = font_small.render("Press 5", True, (255,255,255))
           screen.blit(num5_text, (370, 480))
           inst_text2 = font.render("Press C to Continue", True, (255,0,0))
-          screen.blit(inst_text2, (220,544))
+          screen.blit(inst_text2, (220,545))
           for event in pygame.event.get():
              global run
              global playerimg
              if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-             elif event.type == pygame.KEYDOWN:
-               if event.key == pygame.K_q:
-                    pygame.quit()
-                    quit()
-               elif event.key == pygame.K_1:
-                    i="1"
-                    select("1")
-                    screen.blit(inst_text, (210, 50))
-                    pygame.display.update()
-               elif event.key == pygame.K_2:
-                    i="2"
-                    select("2")
-                    screen.blit(inst_text, (210, 50))
-                    pygame.display.update()
-               elif event.key == pygame.K_3:
-                    i="3"
-                    select("3")
-                    screen.blit(inst_text, (210, 50))
-                    pygame.display.update()
-               elif event.key == pygame.K_4:
-                    i="4"
-                    select(i)
-                    screen.blit(inst_text, (210, 50))
-                    pygame.display.update()
-               elif event.key == pygame.K_5:
-                    i="5"
-                    select("5")
-                    screen.blit(inst_text, (210, 50))
-                    pygame.display.update()
-               elif event.key == pygame.K_c:
-                    buy = False
-                    run = True
-               elif select_status:
-                    global t
-                    t=event.key
-                    select(i)
-
+             elif event.type == pygame.MOUSEBUTTONUP:
+                  pos = pygame.mouse.get_pos()
+                  t=pygame.key.get_pressed()
+                  if img1.get_rect(topleft=(50,100)).collidepoint(pos):
+                       pressed="1"
+                  if img2.get_rect(topleft=(350,100)).collidepoint(pos):
+                       pressed="2"
+                  if img3.get_rect(topleft=(650,100)).collidepoint(pos):
+                       pressed="3"
+                  if img4.get_rect(topleft=(50,350)).collidepoint(pos):
+                       pressed="4"
+                  if img5.get_rect(topleft=(350,350)).collidepoint(pos):
+                       pressed="5"
+                  i=pressed
+                  select(pressed)
+                  screen.blit(inst_text,(210 ,50))
+                  pygame.display.update()
+             keys=pygame.key.get_pressed()        
+             if keys[pygame.K_q]:
+                  pygame.quit()
+                  quit()
+             elif keys[pygame.K_1]:
+                 i="1"
+                 select("1")
+                 screen.blit(inst_text, (210, 50))
+                 pygame.display.update()
+             elif keys[pygame.K_2]:
+                 i="2"
+                 select("2")
+                 screen.blit(inst_text, (210, 50))
+                 pygame.display.update()
+             elif keys[pygame.K_3]:
+                 i="3"
+                 select("3")
+                 screen.blit(inst_text, (210, 50))
+                 pygame.display.update()
+             elif keys[pygame.K_4]:
+                 i="4"
+                 select(i)
+                 screen.blit(inst_text, (210, 50))
+                 pygame.display.update()
+             elif keys[pygame.K_5]:
+                 i="5"
+                 select("5")
+                 screen.blit(inst_text, (210, 50))
+                 pygame.display.update()
+             elif keys[pygame.K_c]:
+                 buy = False
+                 run = True
+             elif select_status:
+                 t=pygame.key.get_pressed()
+                 select(i)       
           try:
                screen.blit(inst_text,(210,50))
                pygame.display.update()
@@ -212,7 +230,7 @@ def select(i):
           global run
           global buy
           try:
-               if t== pygame.K_d:
+               if t[pygame.K_d]:
                     playerimg = pygame.image.load("spaceship"+str(i)+".png")
                     inst_text = font.render(str(i)+"th spaceship selected", True, (0,255,0))
                     screen.blit(inst_text,(210,50))
@@ -222,7 +240,7 @@ def select(i):
                     run= True
                     select_status=False
                     t=0
-          except NameError:
+          except NameError or TypeError:
                None
      elif i not in ships["bought"]:
           cost=str((int(i))*100)
@@ -230,7 +248,7 @@ def select(i):
           screen.blit(inst_text, (210, 50))
           pygame.display.update()
           try:
-               if t== pygame.K_b:
+               if t[pygame.K_b]:
                     if coins>=int(cost):
                          coins=coins-int(cost)
                          ships["bought"]=ships["bought"]+str(i)
@@ -247,7 +265,7 @@ def select(i):
                          pygame.display.update()
                          select_status=False
                          t=0
-          except NameError:
+          except NameError or TypeError:
                None
 
 #speaker
@@ -378,30 +396,51 @@ def shotgun():
      power_state[1]=power_state[1]-1
      shotgun_state=1000
 
+#bot
+AI_space=False
+AI_right=False
+AI_left=False
+autopilot_state=0
+autopilot_time=100000
+button_press=0
+def AI():
+     global enemyY,enemyX,playerY,playerX,power_state,X_change,Y_change,vel,bulletY_change,AI_space,AI_left,AI_right
+     for i in range(len(enemyX)):
+          if enemyY[i]==max(enemyY):
+               enemy_future_X=enemyX[i]+(X_change[i]*(playerY-enemyY[i]))/bulletY_change
+               if collision(playerX,enemyY[i],enemy_future_X,enemyY[i]):
+                    AI_space=True
+               elif (enemyX[i]>playerX+bulletY_change) and playerX<600:
+                    AI_right=True
+               elif (enemyX[i]<playerX-bulletY_change) and playerX>100:
+                    AI_left=True
+                    
 #thanos
-stones_img={"soul":pygame.image.load("soul stone dead.png"),"power":pygame.image.load("power stone dead.png"),"space":pygame.image.load("space stone dead.png"),"time":pygame.image.load("time stone dead.png"),"reality":pygame.image.load("reality stone dead.png"),"mind":pygame.image.load("mind stone dead.png")}
-stones_status={"soul":-1,"power":-1,"space":-1,"time":-1,"reality":-1,"mind":-1}
-stones_life={"soul":300,"power":100,"space":100,"time":100,"reality":100,"mind":100}
-stones_X={"soul":400,"power":575,"space":225,"time":750,"reality":50,"mind":400}
-stones_X2={"soul":400,"power":575,"space":225,"time":750,"reality":50,"mind":400}
-stones_Y={"soul":50,"power":150,"space":150,"time":150,"reality":150,"mind":150}
-stones_Y2={"soul":50,"power":150,"space":150,"time":150,"reality":150,"mind":150}
+stones_img={"soul":pygame.image.load("soul stone dead.png"),"black":pygame.image.load("black_stone.png"),"power":pygame.image.load("power stone dead.png"),"space":pygame.image.load("space stone dead.png"),"time":pygame.image.load("time stone dead.png"),"reality":pygame.image.load("reality stone dead.png"),"mind":pygame.image.load("mind stone dead.png")}
+stones_status={"soul":-1,"power":-1,"space":-1,"time":-1,"reality":-1,"mind":-1,"black":-2}
+stones_life={"soul":300,"power":100,"space":100,"time":100,"reality":100,"mind":200,"black":0}
+stones_X={"soul":400,"power":575,"space":225,"time":750,"reality":50,"mind":400,"black":-50}
+stones_X2={"soul":400,"power":575,"space":225,"time":750,"reality":50,"mind":400,"black":400}
+stones_Y={"soul":50,"power":150,"space":150,"time":150,"reality":150,"mind":150,"black":-50}
+stones_Y2={"soul":50,"power":150,"space":150,"time":150,"reality":150,"mind":150,"black":250}
 laserimg=pygame.image.load("laser.png")
 laserimg=pygame.transform.scale(laserimg,(10,470))
 for i in stones_img.keys():
      stones_img[i]=pygame.transform.scale(stones_img[i],(40,40))
 def stones_display():
-     if stones_status["soul"]!="not":
+     if stones_status["soul"]!=-2:
           screen.blit(stones_img["soul"], (stones_X["soul"],stones_Y["soul"]))
-     if stones_status["mind"]!="not":
+     if stones_status["mind"]!=-2:
           screen.blit(stones_img["mind"], (stones_X["mind"],stones_Y["mind"]))
-     if stones_status["power"]!="not":
+     if stones_status["power"]!=-2:
           screen.blit(stones_img["power"], (stones_X["power"],stones_Y["power"]))
-     if stones_status["time"]!="not":
+     if stones_status["time"]!=-2:
           screen.blit(stones_img["time"], (stones_X["time"],stones_Y["time"]))
-     if stones_status["space"]!="not":
+     if stones_status["space"]!=-2:
           screen.blit(stones_img["space"], (stones_X["space"],stones_Y["space"]))
-     if stones_status["reality"]!="not":
+     if stones_status["black"]!=-2:
+          screen.blit(stones_img["black"], (stones_X["black"],stones_Y["black"]))
+     if stones_status["reality"]!=-2:
           screen.blit(stones_img["reality"], (stones_X["reality"],stones_Y["reality"]))
 stone_trigger_state=2500
 def stone_trigger():
@@ -409,16 +448,18 @@ def stone_trigger():
      a=True
      c=["soul","power","time","reality","mind","space"]
      for i in stones_img.keys():
+          if i=="black":
+               continue
           if stones_status[i]==-2:
                c.remove(i)
           elif stones_status[i]!=-1:
                a=False
      if c==[]:
           stone_trigger_state=4000
-          stones_status={"soul":-1,"power":-1,"space":-1,"time":-1,"reality":-1,"mind":-1}
-          stones_life={"soul":300,"power":100,"space":100,"time":100,"reality":100,"mind":100}
-          stones_X={"soul":400,"power":575,"space":225,"time":750,"reality":50,"mind":400}
-          stones_Y={"soul":50,"power":150,"space":150,"time":150,"reality":150,"mind":150}
+          stones_status={"soul":-1,"power":-1,"space":-1,"time":-1,"reality":-1,"mind":-1,"black":-2}
+          stones_life={"soul":300,"power":100,"space":100,"time":100,"reality":100,"mind":200,"black":0}
+          stones_X={"soul":400,"power":575,"space":225,"time":750,"reality":50,"mind":400,"black":-50}
+          stones_Y={"soul":50,"power":150,"space":150,"time":150,"reality":150,"mind":150,"black":-50}
      elif a and score>10:
           d=random.choice(c)
           if d=="soul":
@@ -468,7 +509,7 @@ def soulstone():
      global stones_img,stones_status,stone_trigger_state,stones_life,stones_X,stones_Y,stones_X2,stones_Y2,list_soul
      list_soul=[]
      for i in stones_img.keys():
-          if stones_status[i]==-2 and i!="soul":
+          if stones_status[i]==-2 and i!="soul" and i!="black":
                list_soul.append(i)
      if len(list_soul)>0:
           stones_img["soul"]=pygame.image.load("soul stone.png")
@@ -483,17 +524,16 @@ def mindstone():
      global stones_img,stones_status,stone_trigger_state,left_limit,right_limit
      stones_img["mind"]=pygame.image.load("mind stone.png")
      stones_img["mind"]=pygame.transform.scale(stones_img["mind"],(40,40))
-     stones_status["mind"]=2500
+     stones_status["mind"]=4000
      mixer.music.load("mind_song.mp3")
      mixer.music.play(loops=1,start=10.0)
-     stone_trigger_state=3500
+     stone_trigger_state=5000
      screen.blit(laserimg,(400,150))
      if playerX>=400:
           left_limit=424
      elif playerX<400:
           right_limit=350
 
-portal=[pygame.image.load("portal.png"),pygame.image.load("portal.png"),pygame.image.load("portal.png"),pygame.image.load("portal.png")]
 def spacestone():
       global stones_img,stones_status,stone_trigger_state
       stones_img["space"]=pygame.image.load("space stone.png")
@@ -504,7 +544,10 @@ def spacestone():
       stone_trigger_state=3500
       for i in range(num_enemy):
           enemyimg[i]=pygame.image.load("ufo.png")
-          X_change[i]=4
+          if X_change[i]==3:
+               X_change[i]=4
+          elif X_change[i]==-3:
+               X_change[i]=-4
           
 def teleport():
      global enemyX,enemyY
@@ -519,13 +562,16 @@ def powerstone():
       global stones_img,stones_status,stone_trigger_state
       stones_img["power"]=pygame.image.load("power stone.png")
       stones_img["power"]=pygame.transform.scale(stones_img["power"],(40,40))
-      stones_status["power"]=2300
+      stones_status["power"]=3500
       mixer.music.load("power_song.mp3")
-      mixer.music.play(loops=1)
-      stone_trigger_state=3300
+      mixer.music.play(loops=1,start=65.0)
+      stone_trigger_state=4500
       for i in range(num_enemy):
           enemyimg[i]=pygame.image.load("power_ufo.png")
-          X_change[i]=4
+          if X_change[i]==3:
+               X_change[i]=4
+          elif X_change[i]==-3:
+               X_change[i]=-4
 power_blast_state=[0,0,0,0,0,0]
 
 def power_shield():
@@ -562,8 +608,8 @@ def enemy(x , y, i):
           
 #bullet (Ready = can't see bulet and Fire = bullet current moving)
 bulletimg1 = pygame.image.load("bullet.png")
-bulletX=[0,0,0,0]
-bulletY =[480,480,480,480]
+bulletX=[-200,-200,-200,-200]
+bulletY =[-200,-200,-200,-200]
 bulletY_change = 10
 bullet_limit=0
 bullet_state =["ready","ready","ready","ready"]
@@ -647,6 +693,13 @@ def save_coins():
      f.close()
 
 #Game Over
+animate_over=-1
+def game_over_animation():
+     global animate_over,enemyY,Y_change
+     animate_over=500-min(enemyY)
+     for i in range(num_enemy):
+          Y_change[i]=1
+     
 def game_over():
      global run
      mixer.music.load("end_song.mp3")
@@ -678,6 +731,7 @@ while run:
      screen.blit(shotgunbutton1, (50, 555))
      screen.blit(blastbutton1, (300, 555))
      screen.blit(smgbutton1, (550, 555))
+     pygame.draw.line(screen,(240,0,0),(0,500),(1000,500),3)
      power_score()
      
      for event in pygame.event.get():
@@ -688,26 +742,32 @@ while run:
           elif event.type == pygame.KEYDOWN:
                   if event.key == pygame.K_p:
                           run = False
+                          mixer.music.pause()
                           pause()
                   elif event.key == pygame.K_q:
                           save_coins()
                           pygame.quit()
                           quit()
-                   
+                 
      #alternate mechanic and continous method
      keys = pygame.key.get_pressed()
-     if keys[pygame.K_LEFT] and playerX>left_limit :
+     if (keys[pygame.K_LEFT] or AI_left ) and playerX>left_limit :
           playerX -= vel
-     if keys[pygame.K_RIGHT] and playerX<right_limit :
+          AI_left=False
+     if (keys[pygame.K_RIGHT] or AI_right) and playerX<right_limit  :
           playerX += vel
-     if keys[pygame.K_SPACE]:
+          AI_right=False
+     if keys[pygame.K_SPACE] or AI_space:
+          AI_space=False
           if shotgun_state>0:
                if bullet_state==["ready","ready","ready","ready"]:
                     for p in range(1,4):                         
                          if smg_state==0 and (stones_status["reality"]==-1 or stones_status["reality"]==-2):
                               bulletX[p] = playerX
+                              bulletY[p]= 480
                          elif stones_status["reality"]>0:
                               bulletX[p]=playerX
+                              bulletY[p]= 480
                          elif smg_state>0:
                               bulletX[p]=playerX-47
                               bulletY[p]=playerY-30
@@ -717,6 +777,7 @@ while run:
                     # current coordinate of spaceship
                     if smg_state==0:
                          bulletX[1] = playerX
+                         bulletY[1] = 480
                     elif smg_state>0:
                          bulletX[1]=playerX-47
                          bulletY[1]=playerY-30
@@ -724,13 +785,25 @@ while run:
      if keys[pygame.K_b] :
           if power_state[0]>=1 and blast_state==0:
                blast()
-     if keys[pygame.K_n] and smg_state==0 and stones_status["reality"]==-1:
+     if keys[pygame.K_n] and smg_state==0 and (stones_status["reality"]==-1 or stones_status["reality"]==-2):
           if power_state[2]>=1:
                smg()
      if keys[pygame.K_v] and shotgun_state==0:
           if power_state[1]>=1:
                shotgun()
-               
+     if keys[pygame.K_m] and button_press==0:
+          button_press=40
+          if not autopilot_state:
+               autopilot_state=True
+               autopilot_time=autopilot_time//1
+          else:
+               autopilot_state=False
+               autopilot_time=autopilot_time//1
+     if button_press>0: # to prevent multiple button press for autopilot
+          button_press-=1
+     if keys[pygame.K_x]:
+          mindstone()
+          
      #stone trigger
      if stone_trigger_state==0:
           stone_trigger()
@@ -763,17 +836,30 @@ while run:
      elif shotgun_state==0:
           bullet_state[2]="ready"
           bullet_state[3]="ready"
-          bulletY[2]=480
-          bulletY[3]=480
+          bulletY[2]=0
+          bulletY[3]=0
 
+     #autopilot
+     if autopilot_state and autopilot_time>1:
+          autopilot_time-=1
+          AI()
+     elif autopilot_time==1 and autopilot_state:
+          autopilot_state=False
+          autopilot_time=0
+     elif not autopilot_state:
+          autopilot_time+=0.2
+          
      #life of stones
      for t in stones_X.keys():
           for j in range(1,4):
-               collisions = collision (stones_X[t] , stones_Y[t] , bulletX[j] , bulletY[j])
+               if smg_state>0:
+                    collisions = smg_collision (stones_X[t] , stones_Y[t] , bulletX[j] , bulletY[j])
+               else:
+                     collisions = collision (stones_X[t] , stones_Y[t] , bulletX[j] , bulletY[j])
                if collisions and score>25 :
-                    bulletY[j] = 480
+                    bulletY[j] = -200
                     bullet_state[j] = "ready"
-                    if stones_status[t]==-1 and stones_status["soul"]==-1:
+                    if stones_status[t]==-1 and (stones_status["soul"]==-1 or stones_status["soul"]==-2):
                          stones_life[t]-=5
                     if stones_life[t]==0:
                          stones_X[t]=-50
@@ -832,9 +918,18 @@ while run:
           stones_img["soul"]=pygame.transform.scale(stones_img["soul"],(40,40))
           
      #mind stone
-     if stones_status["mind"]>0:
+     if stones_status["mind"]==940:
+          stones_status["black"]=-1
+          stones_X["black"]=stones_X2["black"]
+          stones_Y["black"]=stones_Y2["black"]
+          stones_life["black"]=100
           screen.blit(laserimg,(415,128))
           stones_status["mind"]=stones_status["mind"]-1
+          
+     elif stones_status["mind"]>0 :
+          screen.blit(laserimg,(415,128))
+          stones_status["mind"]=stones_status["mind"]-1
+     
      elif stones_status["mind"]==0:
           stones_status["mind"]=-1
           mixer.music.fadeout(4000)
@@ -856,8 +951,11 @@ while run:
           stones_img["space"]=pygame.transform.scale(stones_img["space"],(40,40))
           for i in range(num_enemy):
                enemyimg[i]=pygame.image.load("enemy.png")
-               X_change[i]=3
-
+               if X_change[i]>0:
+                    X_change[i]=3
+               elif X_change[i]<0:
+                    X_change[i]=-3
+                    
      #power stone
      if stones_status["power"]>0:
           power_shield()
@@ -869,41 +967,53 @@ while run:
           stones_img["power"]=pygame.transform.scale(stones_img["power"],(40,40))
           for i in range(num_enemy):
                enemyimg[i]=pygame.image.load("enemy.png")
-               X_change[i]=3
-     
+               if X_change[i]>0:
+                    X_change[i]=3
+               elif X_change[i]<0:
+                    X_change[i]=-3
+                    
      # enemy movement
-     for i in range(len(enemyX)):
-          if enemyY[i] >= 440:
-               for j in range (len(enemyX)):
-                    enemyY[j] = 2000
-                    mixer.music.stop()
-                    save_highscore()
-                    rewardY_change=0   
-                    game_over()
-               
-          enemyX[i] = enemyX[i] + X_change[i]
-          if enemyX[i] <= 0:
-               X_change[i] = 3
-               enemyY[i] = enemyY[i] + Y_change[i]
-          elif enemyX[i] >= 736:
-               X_change[i] = -3
-               enemyY[i] = enemyY[i] + Y_change[i]
-               
-          #collision check
-          for j in range(1,4):
-               if smg_state<=0:
-                    collisions = collision (enemyX[i] , enemyY[i] , bulletX[j] , bulletY[j])
-               else:
-                    collisions = smg_collision (enemyX[i],enemyY[i] ,bulletX[j] , bulletY[j])
-               if collisions:
-                    bulletY[j] = 480
-                    bullet_state[j] = "ready"
-                    score += 1
-                    reward()
-                    enemyX[i]= random.randint(0, 735)
-                    enemyY[i] = random.randint(40, 150)
+     if animate_over==-1:
+          for i in range(len(enemyX)):
+               if enemyY[i] >= 440:
+                    for j in range (len(enemyX)):
+                         mixer.music.stop()
+                         save_highscore()
+                         rewardY_change=0   
+                         game_over_animation()
+                    
+               enemyX[i] = enemyX[i] + X_change[i]
+               if enemyX[i] <= 0:
+                    X_change[i] = 3
+                    enemyY[i] = enemyY[i] + Y_change[i]
+               elif enemyX[i] >= 736:
+                    X_change[i] = -3
+                    enemyY[i] = enemyY[i] + Y_change[i]     
+     
+               #collision check
+               for j in range(1,4):
+                    if smg_state<=0:
+                         collisions = collision (enemyX[i] , enemyY[i] , bulletX[j] , bulletY[j])
+                    else:
+                         collisions = smg_collision (enemyX[i],enemyY[i] ,bulletX[j] , bulletY[j])
+                    if collisions:
+                         bulletY[j] =-200
+                         bullet_state[j] = "ready"
+                         score += 1
+                         reward()
+                         enemyX[i]= random.randint(0, 735)
+                         enemyY[i] = random.randint(40, 150)
+               if stones_status["black"]==-2:
+                    enemy(enemyX[i], enemyY[i], i)
 
-          enemy(enemyX[i], enemyY[i], i)
+     elif animate_over==0:
+          game_over()
+
+     elif animate_over>0:
+          animate_over-=1
+          for i in range(len(enemyX)):
+               enemyY[i]=enemyY[i]+Y_change[i]
+               enemy(enemyX[i], enemyY[i], i)
      reward_collision()
      
      # Bullet movement
@@ -913,7 +1023,7 @@ while run:
                     fire(bulletX[1], bulletY[1],bulletimg[1],1)
                     bulletY[1] -= bulletY_change
                if bulletY[1] <= bullet_limit:
-                    bulletY[1] = 480
+                    bulletY[1] = -200
                     bullet_state[1] = "ready"
           if q==2 and shotgun_state>0:
                if bullet_state[2] is "fire":
@@ -921,7 +1031,7 @@ while run:
                     bulletX[2] -=bulletY_change/2
                     fire(bulletX[2], bulletY[2],bulletimg[2],2)
                if bulletY[2] <= bullet_limit or bulletX[2]<=left_limit:
-                    bulletY[2] = 480
+                    bulletY[2] = -200
                     bullet_state[2] = "ready"
           if q==3 and shotgun_state>0:
                if bullet_state[3] is "fire":
@@ -929,7 +1039,7 @@ while run:
                     bulletX[3] +=bulletY_change/2
                     fire(bulletX[3], bulletY[3],bulletimg[3],3)
                if bulletY[3] <= bullet_limit or bulletX[3]>=right_limit:
-                    bulletY[3] = 480
+                    bulletY[3] = -200
                     bullet_state[3] = "ready"
                     
      # Reward movement
@@ -949,7 +1059,6 @@ while run:
      show_highscore()
      show_coins()
      pygame.display.update()
-     
 pygame.quit()
 
 
