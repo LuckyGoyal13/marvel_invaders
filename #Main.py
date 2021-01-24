@@ -714,7 +714,7 @@ def game_over():
              elif event.type == pygame.KEYDOWN:
                if event.key == pygame.K_y:
                     pygame.quit()
-                    os.system("Main.py")
+                    os.system("#Main.py")
                elif event.key == pygame.K_n:
                     pygame.quit()
                     quit()
